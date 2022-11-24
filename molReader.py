@@ -30,6 +30,8 @@ def reader(molSmile):
     print(adjacencyMatrix)
     featureMatrix = createFeatureMatrix(mol)
     print(featureMatrix)
+    regularizationMatrix = createRegularizationMatrix(mol)
+    print(regularizationMatrix)
 
     # TODO function to convert the values of the featureMatrix to binaries values
     binaryFeatureMatrix = convertFeatureMatrixToBinary(featureMatrix)
@@ -37,6 +39,13 @@ def reader(molSmile):
 
 def createAdjacencyMatrix(mol):
     return np.array(Chem.GetAdjacencyMatrix(mol))
+
+def createRegularizationMatrix(mol):
+    adj = createAdjacencyMatrix(mol)
+    deg = np.array(np.sum(adj, axis=0))
+    deg = np.matrix(np.diag(deg))
+    adj = adj + np.identity(mol.GetNumAtoms())
+    return np.matmul(adj, np.linalg.inv(deg))
 
 def createFeatureMatrix(mol):
     result = []
