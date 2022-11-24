@@ -5,7 +5,7 @@ from rdkit import Chem
 # TODO completer les features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
 features = [
     "GetSymbol",
-    "GetDegree",
+    "GetTotalDegree",
     "GetImplicitValence",
     "GetIsAromatic"
 ]
