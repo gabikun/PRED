@@ -4,13 +4,15 @@ from rdkit import Chem
 
 # TODO completer les features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
 features = [
+    "GetSymbol",
     "GetDegree",
+    "GetImplicitValence",
     "GetIsAromatic"
 ]
 
 def reader(molSmile):
     mol = Chem.MolFromSmiles(molSmile)
-    utils.exception("mol is considered as 'None'", mol == None)
+    utils.exception("mol is considered as 'None'", mol is None)
 
     adjacencyMatrix = createAdjacencyMatrix(mol)
     print(adjacencyMatrix)
