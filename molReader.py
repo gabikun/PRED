@@ -44,8 +44,9 @@ def createRegularizationMatrix(mol):
     adj = createAdjacencyMatrix(mol)
     deg = np.array(np.sum(adj, axis=0))
     deg = np.matrix(np.diag(deg))
+    half_deg = np.linalg.inv(np.sqrt(deg))
     adj = adj + np.identity(mol.GetNumAtoms())
-    return np.matmul(adj, np.linalg.inv(deg))
+    return np.matmul(np.matmul(half_deg, adj), half_deg)
 
 def createFeatureMatrix(mol):
     result = []
