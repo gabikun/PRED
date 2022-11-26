@@ -1,10 +1,7 @@
 import torch
 from torch import Tensor
-from torch.nn import SELU
 from torch_geometric.nn import GCNConv
-from torch_geometric.datasets import Planetoid
 
-dataset = Planetoid(root='.', name='Cora')
 
 class GCN(torch.nn.Module):
     def __init__(self, in_channels):
@@ -17,8 +14,10 @@ class GCN(torch.nn.Module):
     def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
         # x: Node feature matrix of shape [num_nodes, in_channels]
         # edge_index: Graph connectivity matrix of shape [2, num_edges]
-        x = self.conv1(x, edge_index).relu()
-        x = self.conv2(x, edge_index)
+        x = self.conv1(x, edge_index).selu()
+        x = self.conv2(x, edge_index).selu()
+        x = self.conv3(x, edge_index).selu()
+        x = self.conv4(x, edge_index).selu()
         return x
 
 
