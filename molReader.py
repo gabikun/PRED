@@ -22,6 +22,7 @@ aromatic = [
     True, False
 ]
 
+
 def reader(molSmile):
     mol = Chem.MolFromSmiles(molSmile)
     utils.exception("mol is considered as 'None'", mol is None)
@@ -35,10 +36,12 @@ def reader(molSmile):
     binaryFeatureMatrix = convertFeatureMatrixToBinary(featureMatrix)
     # print(binaryFeatureMatrix)
 
-    return adjacencyMatrix, binaryFeatureMatrix, regularizationMatrix
+    return mol, binaryFeatureMatrix, adjacencyMatrix, regularizationMatrix
+
 
 def createAdjacencyMatrix(mol):
     return np.array(Chem.GetAdjacencyMatrix(mol))
+
 
 def createRegularizationMatrix(mol):
     adj = createAdjacencyMatrix(mol)
@@ -46,7 +49,8 @@ def createRegularizationMatrix(mol):
     deg = np.matrix(np.diag(deg))
     half_deg = np.linalg.inv(np.sqrt(deg))
     adj = adj + np.identity(mol.GetNumAtoms())
-    return np.matmul(np.matmul(half_deg, adj), half_deg)
+    return half_deg.dot(adj).dot(half_deg)
+
 
 def createFeatureMatrix(mol):
     result = []
@@ -57,6 +61,7 @@ def createFeatureMatrix(mol):
         result.append(atomFeatures)
 
     return result
+
 
 def convertFeatureMatrixToBinary(featureMatrix):
     result = []
@@ -73,12 +78,9 @@ def convertFeatureMatrixToBinary(featureMatrix):
         binaryFeature[atomImplicitValence.index(feature[2]) + cursor] = 1
         cursor += len(atomImplicitValence)
 
-        if (feature[3]): binaryFeature[cursor] = 1
+        if feature[3]:
+            binaryFeature[cursor] = 1
 
         result.append(binaryFeature)
 
     return result
-
-
-
-

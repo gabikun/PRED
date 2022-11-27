@@ -1,8 +1,13 @@
 import molReader
 import gcn
 
-adjacencyMatrix, binaryFeatureMatrix, regularizationMatrix = molReader.reader('COC1=CC=CC(=C1O)C=NC(CCSC)C(=O)O')
-print(regularizationMatrix)
+molecule, featureMat, adjMat, reguMat = molReader.reader('C1CC1C2CC2')
+print("reguMat")
+print(reguMat)
+print("adjMat")
+print(adjMat)
+print("featureMat")
+print(featureMat)
 
 model = gcn.GCN(19)
 print(model)
