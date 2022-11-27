@@ -1,5 +1,6 @@
 import utils
 import numpy as np
+import scipy
 from rdkit import Chem
 
 # features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
@@ -44,12 +45,10 @@ def createAdjacencyMatrix(mol):
 
 
 def createRegularizationMatrix(mol):
-    adj = createAdjacencyMatrix(mol)
-    deg = np.array(np.sum(adj, axis=0))
-    deg = np.matrix(np.diag(deg))
-    half_deg = np.linalg.inv(np.sqrt(deg))
-    adj = adj + np.identity(mol.GetNumAtoms())
-    return half_deg.dot(adj).dot(half_deg)
+    adj_hat = createAdjacencyMatrix(mol) + np.identity(mol.GetNumAtoms())
+    deg = np.matrix(np.diag(np.array(np.sum(adj_hat, axis=0))))
+    half_deg = scipy.linalg.fractional_matrix_power(deg, -0.5)
+    return half_deg.dot(adj_hat).dot(half_deg)
 
 
 def createFeatureMatrix(mol):
