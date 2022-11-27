@@ -2,7 +2,7 @@ import utils
 import numpy as np
 from rdkit import Chem
 
-# TODO completer les features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
+# features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
 features = [
     "GetSymbol",
     "GetDegree",
@@ -27,15 +27,15 @@ def reader(molSmile):
     utils.exception("mol is considered as 'None'", mol is None)
 
     adjacencyMatrix = createAdjacencyMatrix(mol)
-    print(adjacencyMatrix)
+    # print(adjacencyMatrix)
     featureMatrix = createFeatureMatrix(mol)
-    print(featureMatrix)
+    # print(featureMatrix)
     regularizationMatrix = createRegularizationMatrix(mol)
-    print(regularizationMatrix)
-
-    # TODO function to convert the values of the featureMatrix to binaries values
+    # print(regularizationMatrix)
     binaryFeatureMatrix = convertFeatureMatrixToBinary(featureMatrix)
-    print(binaryFeatureMatrix)
+    # print(binaryFeatureMatrix)
+
+    return adjacencyMatrix, binaryFeatureMatrix, regularizationMatrix
 
 def createAdjacencyMatrix(mol):
     return np.array(Chem.GetAdjacencyMatrix(mol))

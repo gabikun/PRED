@@ -19,6 +19,3 @@ class GCN(torch.nn.Module):
         x = self.conv3(x, edge_index).selu()
         x = self.conv4(x, edge_index).selu()
         return x
-
-
-model = GCN(19)
