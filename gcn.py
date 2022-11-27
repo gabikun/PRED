@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from torch import Tensor
 from torch_geometric.nn import GCNConv
 
@@ -14,8 +15,12 @@ class GCN(torch.nn.Module):
     def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
         # x: Node feature matrix of shape [num_nodes, in_channels]
         # edge_index: Graph connectivity matrix of shape [2, num_edges]
-        x = self.conv1(x, edge_index).selu()
-        x = self.conv2(x, edge_index).selu()
-        x = self.conv3(x, edge_index).selu()
-        x = self.conv4(x, edge_index).selu()
+        x = self.conv1(x, edge_index)
+        x = F.selu(x)
+        x = self.conv2(x, edge_index)
+        x = F.selu(x)
+        x = self.conv3(x, edge_index)
+        x = F.selu(x)
+        x = self.conv4(x, edge_index)
+        x = F.selu(x)
         return x
