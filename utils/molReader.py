@@ -1,4 +1,4 @@
-import utils
+import PRED.utils.utils as utils
 import numpy as np
 import scipy
 from rdkit import Chem
