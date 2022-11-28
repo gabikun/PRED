@@ -1,4 +1,4 @@
-import PRED.utils.utils as utils
+import utils.utils as utils
 import numpy as np
 import scipy
 from rdkit import Chem
@@ -45,10 +45,10 @@ def createAdjacencyMatrix(mol):
 
 
 def createRegularizationMatrix(mol):
-    adj_hat = createAdjacencyMatrix(mol) + np.identity(mol.GetNumAtoms())
-    deg = np.matrix(np.diag(np.array(np.sum(adj_hat, axis=0))))
+    adj_dash = createAdjacencyMatrix(mol) + np.identity(mol.GetNumAtoms())
+    deg = np.matrix(np.diag(np.array(np.sum(adj_dash, axis=0))))
     half_deg = scipy.linalg.fractional_matrix_power(deg, -0.5)
-    return half_deg.dot(adj_hat).dot(half_deg)
+    return half_deg.dot(adj_dash).dot(half_deg)
 
 
 def createFeatureMatrix(mol):
