@@ -16,8 +16,8 @@ print(featureMat)
 # Initialize the weights
 np.random.seed(77777)
 n1 = 15  #number of neurons in the hidden layer
-n2 = 20  #number of neurons in the output layer
-n3 = 27  #number of neurons in the output layer
+n2 = 20  #number of neurons in the hidden layer
+n3 = 27  #number of neurons in the hidden layer
 n4 = 36  #number of neurons in the output layer
 
 W1 = np.random.randn(19, n1) * 0.01
