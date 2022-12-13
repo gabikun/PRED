@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+import torch.nn.functional as F
 
 
 def glorot_init(nin, nout):
@@ -68,7 +70,11 @@ class GCNLayer():
 
         H = W @ self._X  # (h, D)*(D, bs) -> (h, bs)
         if self.activation is not None:
-            H = self.activation(H)
+            if type(self.activation) is str:
+                H = F.selu(torch.tensor(H))
+                H = H.numpy()
+            else:
+                H = self.activation(H)
         self._H = H  # (h, bs)
         return self._H.T  # (bs, h)
 
