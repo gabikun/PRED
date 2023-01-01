@@ -14,18 +14,22 @@ class MyGraphConvModel(tf.keras.Model):
         self.gc4 = GraphConv(36, activation_fn=tf.nn.selu)
 
         # Readout
-        self.readout = GraphGather(batch_size=batch_size, activation_fn=tf.nn.tanh)
+        self.readout = GraphGather(batch_size=batch_size, activation_fn=tf.nn.selu)
 
         self.dense2 = layers.Dense(n_tasks * 2)
         self.logits = layers.Reshape((n_tasks, 2))
         self.softmax = layers.Softmax()
 
     def call(self, inputs):
+        # TODO inputs
+        # Hidden layers
         gc1_output = self.gc1(inputs)
         gc2_output = self.gc2([gc1_output] + inputs[1:])
         gc3_output = self.gc3([gc2_output] + inputs[1:])
         gc4_output = self.gc4([gc3_output] + inputs[1:])
 
+        # TODO readout
+        # Readout
         readout_output = self.readout([gc4_output] + inputs[1:])
 
         logits_output = self.logits(self.dense2(readout_output))

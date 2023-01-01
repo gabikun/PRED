@@ -40,6 +40,7 @@ H1 = gcn(featureMat, W1)
 H2 = gcn(H1, W2)
 H3 = gcn(H2, W3)
 H4 = gcn(H3, W4)
+
 print('Features Representation from GCN output:\n', H4)
 
 def plot_features(output_tensor):

@@ -1,6 +1,6 @@
 import PRED.utils.utils as utils
 import numpy as np
-import scipy
+import scipy.linalg
 from rdkit import Chem
 
 # features : https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html
