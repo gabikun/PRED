@@ -39,8 +39,3 @@ train_scores = model.evaluate_generator(data_generator(train_dataset, n_tasks, b
 print("Training ROC-AUC Score: %f" % train_scores["mean-roc_auc_score"])
 valid_scores = model.evaluate_generator(data_generator(train_dataset, n_tasks, batch_size), [metric], transformers)
 print("Validation ROC-AUC Score: %f" % valid_scores["mean-roc_auc_score"])
-
-
-
-
-MTCmodel = MultitaskClassifier(n_tasks=175, n_features=138, layer_sizes=[96, 63], dropouts=0.47, activation_fns='relu', n_classes=138)

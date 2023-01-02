@@ -1,6 +1,8 @@
 from deepchem.models.layers import GraphConv, GraphPool, GraphGather
 import tensorflow as tf
 import tensorflow.keras.layers as layers
+import torch.nn as nn
+import torch.nn.functional as F
 
 class MyGraphConvModel(tf.keras.Model):
 
@@ -20,6 +22,13 @@ class MyGraphConvModel(tf.keras.Model):
         self.logits = layers.Reshape((n_tasks, 2))
         self.softmax = layers.Softmax()
 
+        # Fully connected layers
+        self.linear1 = nn.Linear(in_features=175, out_features=96)
+        self.bn1 = nn.BatchNorm1d(num_features=96)
+        self.linear2 = nn.Linear(in_features=96, out_features=63)
+        self.bn2 = nn.BatchNorm1d(num_features=63)
+        self.linear3 = nn.Linear(in_features=63, out_features=138)
+
     def call(self, inputs):
         # TODO inputs
         # Hidden layers
@@ -34,4 +43,10 @@ class MyGraphConvModel(tf.keras.Model):
 
         logits_output = self.logits(self.dense2(readout_output))
 
-        return self.softmax(logits_output)
+        rd_output = self.softmax(logits_output)
+
+
+        # Fully connected layers
+        fc1_output = F.relu(self.bn1(self.linear1(rd_output)))
+        fc2_output = F.relu(self.bn2(self.linear2(fc1_output)))
+        return F.sigmoid(self.linear3(fc2_output))
