@@ -3,9 +3,10 @@ import matplotlib.pyplot as plot
 import numpy as np
 from PRED.deepchem2.gcnModel import MyGraphConvModel
 from PRED.deepchem2.dataGenerator import data_generator
+from deepchem.models.fcnet import MultitaskClassifier
 
 # Load Tox21 dataset
-tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv')
+tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', reload=False)
 train_dataset, valid_dataset, test_dataset = tox21_datasets
 
 n_tasks = len(tox21_tasks)
@@ -38,3 +39,8 @@ train_scores = model.evaluate_generator(data_generator(train_dataset, n_tasks, b
 print("Training ROC-AUC Score: %f" % train_scores["mean-roc_auc_score"])
 valid_scores = model.evaluate_generator(data_generator(train_dataset, n_tasks, batch_size), [metric], transformers)
 print("Validation ROC-AUC Score: %f" % valid_scores["mean-roc_auc_score"])
+
+
+
+
+MTCmodel = MultitaskClassifier(n_tasks=175, n_features=138, layer_sizes=[96, 63], dropouts=0.47, activation_fns='relu', n_classes=138)
