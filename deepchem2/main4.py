@@ -3,9 +3,10 @@ import matplotlib.pyplot as plot
 import numpy as np
 from PRED.deepchem2.gcnModel import MyGraphConvModel
 from PRED.deepchem2.dataGenerator import data_generator
+from deepchem.models.fcnet import MultitaskClassifier
 
 # Load Tox21 dataset
-tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv')
+tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', reload=False)
 train_dataset, valid_dataset, test_dataset = tox21_datasets
 
 n_tasks = len(tox21_tasks)
