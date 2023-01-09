@@ -20,6 +20,8 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
                  n_tasks,
                  graph_conv_layers,
                  dense_layer_size,
+                 fc_layers,
+                 output_size,
                  graph_pooling_type,
                  mode,
                  number_atom_features,
@@ -32,6 +34,9 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         self.graph_conv_layers = graph_conv_layers
         self.graph_pooling_type = graph_pooling_type
         self.dense_layer_size = dense_layer_size
+        self.fc_layers = fc_layers
+        self.output_size = output_size
+
         super().__init__(n_tasks=n_tasks,
                          graph_conv_layers=graph_conv_layers,
                          dense_layer_size=dense_layer_size,
@@ -61,11 +66,34 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         self.readout = tf.keras.layers.Lambda(lambda x: tf.keras.backend.sum(x, axis=1))
         self.readout_dense = tf.keras.layers.Dense(self.n_tasks, activation=activations.softmax)
 
+    def build_fc_layer(self):
+        """Builds fully connected layers."""
+        # Implémentation en utilisant Keras
+        self.fcs = []
+        self.fc_dropout = tf.keras.layers.Dropout(0.47)
+        self.fc_batch_norm = tf.keras.layers.BatchNormalization()
+        for i in range(len(self.fc_layers)):
+            self.fcs.append(
+                self.fc_dropout(
+                    self.fc_batch_norm(
+                        tf.keras.layers.Dense(self.fc_layers[i], activation_fn=tf.nn.relu)
+                    )
+                )
+            )
+
+
+    def build_output_layer(self):
+        """Builds output layer."""
+        self.output = tf.keras.layers.Dense(self.output_size, activation=tf.nn.sigmoid)
+
+
     def build(self):
         """Builds the model."""
         self.build_graph_conv_layers()
         self.build_graph_pooling_layer()
         self.build_readout_layer()
+        self.build_fc_layer()
+        self.build_output_layer()
 
     def summary(self):
         """Shows the model summary."""
@@ -73,6 +101,8 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         print('Graph convolution layers:', self.graph_conv_layers)
         print('Graph pooling type:', self.graph_pooling_type)
         print('Dense layer size:', self.dense_layer_size)
+        print('Fully connected layers:', self.fc_layers)
+        print('Ouput layer size:', self.output_size)
 
 # 4 couches de message passing de dimension [15, 20, 27, 36] utilisant la fonction d'activation SELU
 # un max graph pooling est effectué à la fin des 4 couches de message passing
@@ -82,6 +112,8 @@ model = CustomGraphConvModel(
     n_tasks=len(tox21_tasks),
     graph_conv_layers=[15, 20, 27, 36],
     dense_layer_size=175,
+    fc_layers=[96, 63],
+    output_size=138,
     graph_pooling_type='max',
     mode='classification',
     number_atom_features=19,
