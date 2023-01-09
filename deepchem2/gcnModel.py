@@ -23,6 +23,13 @@ class MyGraphConvModel(tf.keras.Model):
         self.logits = layers.Reshape((n_tasks, 2))
         self.softmax = layers.Softmax()
 
+        # Fully connected layers
+        self.fc_d1 = layers.Dense(96, activation=tf.nn.relu)
+        self.fc_d2 = layers.Dense(63, activation=tf.nn.selu)
+        self.fc_d3 = layers.Dense(138, activation=tf.nn.sigmoid)
+        self.fc_dropout = layers.Dropout(0.47)
+
+
     def call(self, inputs):
         # Message Passing Layers
         gc1_output = self.gc1(inputs)
@@ -37,4 +44,10 @@ class MyGraphConvModel(tf.keras.Model):
         readout_output = self.readout([batch_norm3_output] + inputs[1:])
 
         logits_output = self.logits(self.dense2(readout_output))
-        return self.softmax(logits_output)
+
+        rd_output = self.softmax(logits_output)
+
+        # Fully connected layers
+        fc1_output = self.fc_dropout(self.batch_norm3(self.fc_d1(rd_output)))
+        fc2_output = self.fc_dropout(self.batch_norm3(self.fc_d2(fc1_output)))
+        return self.fc_d3(fc2_output)
