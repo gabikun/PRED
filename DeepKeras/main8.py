@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow.keras import activations
 
 # Chargement du dataset tox21
-tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv')
+tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', reload=False)
 train_dataset, valid_dataset, test_dataset = tox21_datasets
 
 # ------------------- GCN MODEL ------------------- #
@@ -71,12 +71,16 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         # Implémentation en utilisant Keras
         self.fcs = []
         self.fc_dropout = tf.keras.layers.Dropout(0.47)
-        self.fc_batch_norm = tf.keras.layers.BatchNormalization()
+        self.fc_batch_norms = []
+        for i in range(len(self.fc_layers)):
+            self.fc_batch_norms.append(
+                tf.keras.layers.BatchNormalization(input_shape=(self.fc_layers[i],))
+            )
         for i in range(len(self.fc_layers)):
             self.fcs.append(
                 self.fc_dropout(
-                    self.fc_batch_norm(
-                        tf.keras.layers.Dense(self.fc_layers[i], activation_fn=tf.nn.relu)
+                    self.fc_batch_norms[i](
+                        tf.keras.layers.Dense(self.fc_layers[i], activation=tf.nn.relu)
                     )
                 )
             )
@@ -118,7 +122,7 @@ model = CustomGraphConvModel(
     mode='classification',
     number_atom_features=19,
     n_classes=2,
-    batch_normalize=True,
+    batch_normalize=False,
     uncertainty=False,
     batch_size=50,
     learning_rate=0.001
