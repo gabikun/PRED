@@ -69,21 +69,11 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
     def build_fc_layer(self):
         """Builds fully connected layers."""
         # Implémentation en utilisant Keras
-        self.fcs = []
         self.fc_dropout = tf.keras.layers.Dropout(0.47)
-        self.fc_batch_norms = []
+        self.fc_batch_norm = tf.keras.layers.BatchNormalization()
+        self.fcs = []
         for i in range(len(self.fc_layers)):
-            self.fc_batch_norms.append(
-                tf.keras.layers.BatchNormalization(input_shape=(self.fc_layers[i],))
-            )
-        for i in range(len(self.fc_layers)):
-            self.fcs.append(
-                self.fc_dropout(
-                    self.fc_batch_norms[i](
-                        tf.keras.layers.Dense(self.fc_layers[i], activation=tf.nn.relu)
-                    )
-                )
-            )
+            self.fcs.append(tf.keras.layers.Dense(self.fc_layers[i], activation=tf.nn.relu))
 
 
     def build_output_layer(self):
