@@ -14,7 +14,6 @@ class MyGraphConvModel(tf.keras.Model):
         self.gc4 = GraphConv(36, activation_fn=tf.nn.selu)
         self.gp1 = GraphPool()
 
-        # Readout
         self.dense1 = layers.Dense(256, activation=tf.nn.tanh)
         self.batch_norm3 = layers.BatchNormalization()
         self.readout = GraphGather(batch_size=batch_size, activation_fn=tf.nn.tanh)
@@ -24,14 +23,12 @@ class MyGraphConvModel(tf.keras.Model):
         self.softmax = layers.Softmax()
 
     def call(self, inputs):
-        # Message Passing Layers
         gc1_output = self.gc1(inputs)
         gc2_output = self.gc2([gc1_output] + inputs[1:])
         gc3_output = self.gc3([gc2_output] + inputs[1:])
         gc4_output = self.gc4([gc3_output] + inputs[1:])
         gp1_output = self.gp1([gc4_output] + inputs[1:])
 
-        # Readout
         dense1_output = self.dense1(gp1_output)
         batch_norm3_output = self.batch_norm3(dense1_output)
         readout_output = self.readout([batch_norm3_output] + inputs[1:])
