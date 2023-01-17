@@ -1,4 +1,3 @@
-from rdkit import Chem
 from rdkit.Chem import rdmolops
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -18,21 +17,21 @@ import matplotlib.pyplot as plt
 
 from rdkit import Chem
 
-
 # Charger les données de descripteurs d'odeurs pour les molécules à partir d'un fichier CSV
 data = pd.read_csv("molecules.csv", sep=";", encoding="utf-8")
 graph_labels = data["odors"].values
 smiles_data = data["smile"].values
 
 # Créer des matrices d'adjacence pour les molécules
-
-stellargraphs = []
-f_symbols = []
-f_degrees = []
-f_implicitValences = []
-f_aromatic = []
+stellargraphs = [] # Contient les graphes de chaque molécule
 symbol_dict = {'C':0, 'O':1, 'N':2, 'S':3, 'Cl':4, 'P':5, 'I':6, 'Na':7}
 for smiles in smiles_data:
+    f_symbols = []  # Contient les features "Symbol" de la molécule
+    f_degrees = [] # Contient les features "Degree" de la molécule
+    f_implicitValences = [] # Contient les features "Implicit Valence" de la molécule
+    f_aromatic = [] # Contient les features "Aromatic" de la molécule
+
+    # On récupère l'object molécule à l'aide de RDKit
     molecule = Chem.MolFromSmiles(smiles)
     adjacency_matrix = rdmolops.GetAdjacencyMatrix(molecule)
 
@@ -47,6 +46,7 @@ for smiles in smiles_data:
             list_source.append(row[0])
             list_target.append(row[1])
 
+    # Partie graphe : source / destinataire
     dataframe_edges = pd.DataFrame(
         {"source": list_source, "target": list_target}
     )
@@ -65,13 +65,13 @@ for smiles in smiles_data:
         else:
             f_aromatic.append(0)
 
+    # Partie features
     dataframe_features = pd.DataFrame(
         {"Symbol" : f_symbols, "Degree": f_degrees, "ImplicitValence": f_implicitValences, "Aromatic": f_aromatic}
     )
 
-    print(dataframe_features)
+    # Assemblage de la partie graphe et features pour former un objet StellarGraph
     stellargraphs.append(StellarGraph(dataframe_features, dataframe_edges))
-
 
 # Utilisez PaddedGraphGenerator pour générer les données d'entraînement
 generator = PaddedGraphGenerator(stellargraphs)
@@ -81,8 +81,6 @@ train_data, test_data = train_test_split(data, test_size=0.2)
 
 # Create a padded graph generator with the given graphs, node features and targets
 #generator = PaddedGraphGenerator(graphs,)
-
-
 
 def create_graph_classification_model(generator):
     gc_model = GCNSupervisedGraphClassification(
@@ -103,8 +101,8 @@ def create_graph_classification_model(generator):
     return model
 
 epochs = 200  # maximum number of training epochs
-folds = 2  # the number of folds for k-fold cross validation
-n_repeats = 2  # the number of repeats for repeated k-fold cross validation
+folds = 5  # the number of folds for k-fold cross validation
+n_repeats = 10  # the number of repeats for repeated k-fold cross validation
 
 es = EarlyStopping(
     monitor="val_loss", min_delta=0, patience=25, restore_best_weights=True
