@@ -4,6 +4,10 @@ import numpy as np
 from tensorflow.keras import activations
 from rdkit import Chem
 
+# Jeu de données TEST
+smiles = ["CC(=O)C1=NCCC1", "CC(=O)C1=NC=CS1"]
+labels = ["grillé", "eau", "pop-corn"]
+
 # Chargement du dataset tox21
 tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', reload=False)
 train_dataset, valid_dataset, test_dataset = tox21_datasets

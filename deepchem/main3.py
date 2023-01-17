@@ -10,7 +10,8 @@ n_tasks = len(tasks)
 batch_size = 100
 
 model = dc.models.KerasModel(MyGraphConvModel(n_tasks, batch_size), loss=dc.models.losses.CategoricalCrossEntropy())
-model.fit_generator(data_generator(train_dataset, n_tasks, batch_size, epochs=50))
+# model.fit_generator(data_generator(train_dataset, n_tasks, batch_size, epochs=50))
+model.fit(train_dataset, nb_epoch=1)
 
 metric = dc.metrics.Metric(dc.metrics.roc_auc_score)
 print('Training set score:', model.evaluate_generator(data_generator(train_dataset, n_tasks, batch_size), [metric], transformers))

@@ -16,11 +16,7 @@ from tensorflow.keras.losses import binary_crossentropy
 from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
-
-import rdkit
 from rdkit import Chem
-from rdkit.Chem import rdMolDescriptors
-
 
 
 # Charger les données de descripteurs d'odeurs pour les molécules à partir d'un fichier CSV
@@ -29,16 +25,21 @@ graph_labels = data["odors"].values
 smiles_data = data["smile"].values
 
 # Créer des matrices d'adjacence pour les molécules
-all_atom_features = []
-edges_lists = []
+
+stellargraphs = []
+f_symbols = []
+f_degrees = []
+f_implicitValences = []
+f_aromatic = []
 symbol_dict = {'C':0, 'O':1, 'N':2, 'S':3, 'Cl':4, 'P':5, 'I':6, 'Na':7}
 for smiles in smiles_data:
     molecule = Chem.MolFromSmiles(smiles)
     adjacency_matrix = rdmolops.GetAdjacencyMatrix(molecule)
+
     id_adj = np.array(adjacency_matrix) + np.identity(molecule.GetNumAtoms())
     graph_df = pd.DataFrame(id_adj)
     edge_list = graph_df.stack().reset_index()
-    print(edge_list)
+
     list_source = []
     list_target = []
     for row in edge_list.values:
@@ -46,35 +47,34 @@ for smiles in smiles_data:
             list_source.append(row[0])
             list_target.append(row[1])
 
-
-    dataframe_edge = pd.DataFrame(
+    dataframe_edges = pd.DataFrame(
         {"source": list_source, "target": list_target}
     )
-    print(dataframe_edge)
 
-    atom_features = []
     for atom in molecule.GetAtoms():
         symbol = atom.GetSymbol()
         degree = atom.GetDegree()
         implicit_valence = atom.GetImplicitValence()
         aromatic = atom.GetIsAromatic()
-        symbol_one_hot = [0]*8
-        symbol_one_hot[symbol_dict[symbol]] = 1
-        degree_one_hot = [0]*5
-        degree_one_hot[degree] = 1
-        implicit_valence_one_hot = [0]*5
-        implicit_valence_one_hot[implicit_valence] = 1
-        aromatic_one_hot = [1] if aromatic else [0]
-        atom_feature = symbol_one_hot+degree_one_hot+implicit_valence_one_hot+aromatic_one_hot
-        atom_features.append(atom_feature)
-    all_atom_features.append(atom_features)
 
+        f_symbols.append(symbol_dict[symbol])
+        f_degrees.append(degree)
+        f_implicitValences.append(implicit_valence)
+        if aromatic is True:
+            f_aromatic.append(1)
+        else:
+            f_aromatic.append(0)
 
-# Utilisez la fonction StellarGraph.from_networkx pour convertir les graphes en StellarGraph
-sg_graphs = [StellarGraph.from_networkx(g) for g in graphs]
+    dataframe_features = pd.DataFrame(
+        {"Symbol" : f_symbols, "Degree": f_degrees, "ImplicitValence": f_implicitValences, "Aromatic": f_aromatic}
+    )
+
+    print(dataframe_features)
+    stellargraphs.append(StellarGraph(dataframe_features, dataframe_edges))
+
 
 # Utilisez PaddedGraphGenerator pour générer les données d'entraînement
-generator = PaddedGraphGenerator(sg_graphs)
+generator = PaddedGraphGenerator(stellargraphs)
 
 # Séparer les données en ensemble d'entraînement et de test
 train_data, test_data = train_test_split(data, test_size=0.2)
@@ -103,8 +103,8 @@ def create_graph_classification_model(generator):
     return model
 
 epochs = 200  # maximum number of training epochs
-folds = 10  # the number of folds for k-fold cross validation
-n_repeats = 5  # the number of repeats for repeated k-fold cross validation
+folds = 2  # the number of folds for k-fold cross validation
+n_repeats = 2  # the number of repeats for repeated k-fold cross validation
 
 es = EarlyStopping(
     monitor="val_loss", min_delta=0, patience=25, restore_best_weights=True

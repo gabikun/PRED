@@ -8,45 +8,35 @@ class MyGraphConvModel(tf.keras.Model):
 
     def __init__(self, n_tasks, batch_size):
         super(MyGraphConvModel, self).__init__()
+        self.gc1 = GraphConv(128, activation_fn=tf.nn.tanh)
+        self.batch_norm1 = layers.BatchNormalization()
+        self.gp1 = GraphPool()
 
-        # Hidden layers
-        self.gc1 = GraphConv(15, activation_fn=tf.nn.selu)
-        self.gc2 = GraphConv(20, activation_fn=tf.nn.selu)
-        self.gc3 = GraphConv(27, activation_fn=tf.nn.selu)
-        self.gc4 = GraphConv(36, activation_fn=tf.nn.selu)
+        self.gc2 = GraphConv(128, activation_fn=tf.nn.tanh)
+        self.batch_norm2 = layers.BatchNormalization()
+        self.gp2 = GraphPool()
 
-        # Readout
-        self.readout = GraphGather(batch_size=batch_size, activation_fn=tf.nn.selu)
+        self.dense1 = layers.Dense(256, activation=tf.nn.tanh)
+        self.batch_norm3 = layers.BatchNormalization()
+        self.readout = GraphGather(batch_size=batch_size, activation_fn=tf.nn.tanh)
 
         self.dense2 = layers.Dense(n_tasks * 2)
         self.logits = layers.Reshape((n_tasks, 2))
         self.softmax = layers.Softmax()
 
-        # Fully connected layers
-        self.linear1 = nn.Linear(in_features=175, out_features=96)
-        self.bn1 = nn.BatchNorm1d(num_features=96)
-        self.linear2 = nn.Linear(in_features=96, out_features=63)
-        self.bn2 = nn.BatchNorm1d(num_features=63)
-        self.linear3 = nn.Linear(in_features=63, out_features=138)
 
     def call(self, inputs):
-        # TODO inputs
-        # Hidden layers
         gc1_output = self.gc1(inputs)
-        gc2_output = self.gc2([gc1_output] + inputs[1:])
-        gc3_output = self.gc3([gc2_output] + inputs[1:])
-        gc4_output = self.gc4([gc3_output] + inputs[1:])
+        batch_norm1_output = self.batch_norm1(gc1_output)
+        gp1_output = self.gp1([batch_norm1_output] + inputs[1:])
 
-        # TODO readout
-        # Readout
-        readout_output = self.readout([gc4_output] + inputs[1:])
+        gc2_output = self.gc2([gp1_output] + inputs[1:])
+        batch_norm2_output = self.batch_norm1(gc2_output)
+        gp2_output = self.gp2([batch_norm2_output] + inputs[1:])
+
+        dense1_output = self.dense1(gp2_output)
+        batch_norm3_output = self.batch_norm3(dense1_output)
+        readout_output = self.readout([batch_norm3_output] + inputs[1:])
 
         logits_output = self.logits(self.dense2(readout_output))
-
-        rd_output = self.softmax(logits_output)
-
-
-        # Fully connected layers
-        fc1_output = F.relu(self.bn1(self.linear1(rd_output)))
-        fc2_output = F.relu(self.bn2(self.linear2(fc1_output)))
-        return F.sigmoid(self.linear3(fc2_output))
+        return self.softmax(logits_output)
