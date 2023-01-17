@@ -2,6 +2,7 @@ import deepchem as dc
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras import activations
+from rdkit import Chem
 
 # Chargement du dataset tox21
 tox21_tasks, tox21_datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', reload=False)
@@ -64,7 +65,7 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         """Builds readout layer."""
         # Implémentation en utilisant Keras
         self.readout = tf.keras.layers.Lambda(lambda x: tf.keras.backend.sum(x, axis=1))
-        self.readout_dense = tf.keras.layers.Dense(self.n_tasks, activation=activations.softmax)
+        self.readout_dense = tf.keras.layers.Dense(self.dense_layer_size, activation=activations.softmax)
 
     def build_fc_layer(self):
         """Builds fully connected layers."""
@@ -75,11 +76,9 @@ class CustomGraphConvModel(dc.models.GraphConvModel):
         for i in range(len(self.fc_layers)):
             self.fcs.append(tf.keras.layers.Dense(self.fc_layers[i], activation=tf.nn.relu))
 
-
     def build_output_layer(self):
         """Builds output layer."""
         self.output = tf.keras.layers.Dense(self.output_size, activation=tf.nn.sigmoid)
-
 
     def build(self):
         """Builds the model."""
@@ -126,4 +125,13 @@ model.fit(train_dataset, nb_epoch=1)
 
 # Evaluation du modèle
 metric = dc.metrics.Metric(dc.metrics.roc_auc_score, np.mean)
+
 print(model.evaluate(test_dataset, [metric], transformers))
+# print(model.predict(test_dataset)[0])
+
+# TEST
+featurizer = dc.feat.ConvMolFeaturizer()
+smiles = ['c1c(O)cccc1O', 'c1c(F)cccc1O', 'c1c(Cl)cccc1O']
+x = featurizer.featurize([Chem.MolFromSmiles(s) for s in smiles])
+
+print(model.predict_on_batch(x))
