@@ -1,0 +1,39 @@
+smile;odors
+C=CC1=CC=CC=C1;amande,balsamique,essence,floral,plastique
+C1=CC=C(C=C1)CO;amande,balsamique,cerise,chimique,doux,floral,fruité,phénolé,rose
+C1=CC=C(C=C1)C=O;amande,boisé,cerfeuil,cerise,doux,fruit à coque,fruité,huile,poudré,sucre brûlé
+C1=CC=C(C=C1)CS;ail,café,chou,menthé,oignon,poireau,raifort,soufré,tomate,vert
+COC1=CC=CC=C1;acétone,acrylate,anis,essence,éther,plastique
+CSC1=CC=CC=C1;boisé,café,épicé,sciure,solvant
+CCC1=CC=CC=N1;herbe
+CC(C)(CC1=CC=CC=C1)O;floral,huile,médicinal,narcisse,phénolé,rhubarbe,rose,vert
+CCCCCCCC(OC)OC;capucine,coriandre,fleur de troëne,floral,ozone,rose,vert,violette,zesté
+CC(C)(OC(=O)/C=C/c1ccccc1)C2CC=C(C)CC2;balsamique,épicé,fruité,noix de muscade,vin
+CCCCCCCCCCCC(=O)OC1=CC=C(C=C1)C;balsamique,cire d'abeille,doux,fruit à coque,gras,huile,vanille
+CCCCCCCC(=O)OC(C)(CCC=C(C)C)C=C;baie,doux,herbe,vert
+C1CC(=O)SC1;ail,brûlé,chimique
+C1=CNC(=C1)C=O;café
+CC(C)C(=O)OC(C)(C)CCC1=CC=CC=C1;doux,floral,fruité,miel,papaye,poudré,vert
+CCOC1=CC=C(C=C1)C=O;anisé,épicé,floral
+CCCC(=O)OC(CC)C1=CC=CC=C1;abricot,floral,jasmin,prune
+CCC(CC)COC(=O)C;agrume,banane,doux,fruité,huile,moisi,pêche,solvant,terre
+CCOC(=O)CCC1=CC=CO1;acrylate,ananas,balsamique,confiture,cuit,doux,épicé,fruité,raifort,rhum
+CCCCCCC#CC(=O)OCC;concombre,floral,vert
+CCOC(=O)CCCC1=CC=CC=C1;fruité,prune
+CC(=CCC/C(=C/COC(=O)CC(=O)C)/C)C;fermentaire,fruité,pomme,vin
+CCCCCCC(OC)OC;cire d'abeille,fleur de troëne,fruité,gras,huile,orange,vert
+CCC=CCCOC(=O)CC(C)C;fromage,fruité,pomme,pomme verte
+CCCCCCOC(=O)CC(C)C;cire d'abeille,doux,frais,fraise,fruité,poire,pomme,vert
+CCCCCCOC(=O)C(C)CC;banane,boisé,cire d'abeille,épicé,frais,fruité,pomme,vert
+CCCCCCC1CC(CO1)OC(=O)C;abricot,doux,floral,fruité,pêche
+CC(C)(CC1=CC=CC=C1)OC=O;jasmin,lys,vert
+COC1CCC2=CC=CC=C12;animal,anisé,aubépine,menthé,terre
+CC(C)(CC1=CC=CC=C1)C=O;marin
+CCCC(=O)OC(C)(C)CC1=CC=CC=C1;baie,cire d'abeille,épicé,floral,frais,fruité,herbe,melon,moisi,prune,vert
+CCOC(=O)CCC1CCCCC1;ananas,doux,pêche,poire
+CCCC=CCOC(=O)C;fruité
+CCC=CCCOC(=O)C(C)CC;ananas,doux,fruité,herbe,légume,melon,poire,pomme,vert
+CC(=CC1=CC=CC=C1)C=O;balsamique,boisé,cannelle,doux,épicé
+COC(=O)CC1=CC=CC=C1;amande,cire d'abeille,doux,épicé,floral,fruité,miel
+COC(CC1=CC=CC=C1)OC;capucine,champignon,floral,herbe,huile,résineux,rose,terre,vert
+C1COC(O1)CC2=CC=CC=C2;cire d'abeille,doux,jacinthe,miel

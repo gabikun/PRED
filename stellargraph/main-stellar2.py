@@ -13,26 +13,50 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.losses import binary_crossentropy
 from tensorflow.keras.callbacks import EarlyStopping
+import plotly.express as px
 import matplotlib.pyplot as plt
 
 from rdkit import Chem
 
 # Charger les données de descripteurs d'odeurs pour les molécules à partir d'un fichier CSV
-data = pd.read_csv("molecules.csv", sep=";", encoding="utf-8")
-graph_labels = data["odors"].values
+data = pd.read_csv("molecules_1.csv", sep=";", encoding="ISO-8859-1")
+odors = data["odors"].values
 smiles_data = data["smile"].values
+
+# Séparer les labels pour chaque molécule en utilisant split()
+odors_split = [odor.split(",") for odor in odors]
+
+# Aplatir la liste imbriquée en une seule liste
+odors_flat = [item for sublist in odors_split for item in sublist]
+
+# Créer un ensemble d'odeurs uniques
+unique_odors = set(odors_flat)
+
+# Créer un dictionnaire d'odeurs uniques
+odor_dict = {odor: i for i, odor in enumerate(unique_odors)}
+
+# Encoder les odeurs à l'aide du dictionnaire
+encoded_odors = [[odor_dict[odor] for odor in odors_split[i]] for i in range(len(odors_split))]
+
+# Créez une matrice d'odeurs codées avec un encodage à chaud
+graph_labels = np.zeros((len(encoded_odors), len(unique_odors)))
+for i, odor_list in enumerate(encoded_odors):
+    for odor in odor_list:
+        graph_labels[i][odor] = 1
+
+graph_labels = pd.DataFrame(graph_labels)
 
 # Créer des matrices d'adjacence pour les molécules
 stellargraphs = [] # Contient les graphes de chaque molécule
 symbol_dict = {'C':0, 'O':1, 'N':2, 'S':3, 'Cl':4, 'P':5, 'I':6, 'Na':7}
-for smiles in smiles_data:
+for smile in smiles_data:
     f_symbols = []  # Contient les features "Symbol" de la molécule
     f_degrees = [] # Contient les features "Degree" de la molécule
     f_implicitValences = [] # Contient les features "Implicit Valence" de la molécule
     f_aromatic = [] # Contient les features "Aromatic" de la molécule
 
     # On récupère l'object molécule à l'aide de RDKit
-    molecule = Chem.MolFromSmiles(smiles)
+    molecule = Chem.MolFromSmiles(smile)
     adjacency_matrix = rdmolops.GetAdjacencyMatrix(molecule)
 
     id_adj = np.array(adjacency_matrix) + np.identity(molecule.GetNumAtoms())
@@ -70,6 +94,8 @@ for smiles in smiles_data:
         {"Symbol" : f_symbols, "Degree": f_degrees, "ImplicitValence": f_implicitValences, "Aromatic": f_aromatic}
     )
 
+    # print(dataframe_features)
+
     # Assemblage de la partie graphe et features pour former un objet StellarGraph
     stellargraphs.append(StellarGraph(dataframe_features, dataframe_edges))
 
@@ -92,7 +118,7 @@ def create_graph_classification_model(generator):
     x_inp, x_out = gc_model.in_out_tensors()
     predictions = Dense(units=96, activation="relu")(x_out)
     predictions = Dense(units=63, activation="relu")(predictions)
-    predictions = Dense(units=138, activation="sigmoid")(predictions)
+    predictions = Dense(units=85, activation="sigmoid")(predictions) # AJUSTER LE 85 EN FONCTION DE LA SORTIE EN PREVISION
 
     # Let's create the Keras model and prepare it for training
     model = Model(inputs=x_inp, outputs=predictions)
@@ -101,7 +127,7 @@ def create_graph_classification_model(generator):
     return model
 
 epochs = 200  # maximum number of training epochs
-folds = 5  # the number of folds for k-fold cross validation
+folds = 2  # the number of folds for k-fold cross validation
 n_repeats = 10  # the number of repeats for repeated k-fold cross validation
 
 es = EarlyStopping(
@@ -130,9 +156,9 @@ def get_generators(train_index, test_index, graph_labels, batch_size):
 
 test_accs = []
 
-stratified_folds = model_selection.RepeatedStratifiedKFold(
+stratified_folds = model_selection.RepeatedKFold(
     n_splits=folds, n_repeats=n_repeats
-).split(graph_labels, graph_labels)
+).split(graph_labels)
 
 for i, (train_index, test_index) in enumerate(stratified_folds):
     print(f"Training and evaluating on fold {i+1} out of {folds * n_repeats}...")
@@ -143,6 +169,23 @@ for i, (train_index, test_index) in enumerate(stratified_folds):
     model = create_graph_classification_model(generator)
 
     history, acc = train_fold(model, train_gen, test_gen, es, epochs)
+
+    # Récupérer les scores de prédiction pour chaque molécule
+    molecules_predictions = model.predict(train_gen)
+
+    # Récupérer les scores de prédiction pour chaque odeur
+    odors_predictions = model.predict(test_gen)
+
+    # Créer les indices de l'ensemble de données utilisé
+    indices = np.arange(len(molecules_predictions))
+
+    # créer un DataFrame à partir des tableaux de prédiction et des sourires, en utilisant les indices pour sélectionner les éléments correspondants
+    df = pd.DataFrame({'molecules_pred': molecules_predictions[indices, 0], 'odors_pred': odors_predictions[indices, 0],
+                       'smiles': smiles_data[indices]})
+
+    fig = px.scatter(df, x='molecules_pred', y='odors_pred', hover_name='smiles',
+                     size=molecules_predictions[indices, 0], color=odors_predictions[indices, 0])
+    fig.show()
 
     test_accs.append(acc)
 
