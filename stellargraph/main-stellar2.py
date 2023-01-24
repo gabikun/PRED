@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from rdkit import Chem
 
 # Charger les données de descripteurs d'odeurs pour les molécules à partir d'un fichier CSV
-data = pd.read_csv("../data/final_odors.csv", sep=",", encoding="utf-8")
+data = pd.read_csv("../data/cleaned_odors.csv", sep=",", encoding="utf-8")
 odors = data["odors"].values
 smiles_data = data["smile"].values
 
@@ -49,7 +49,7 @@ graph_labels = pd.DataFrame(graph_labels)
 
 # Créer des matrices d'adjacence pour les molécules
 stellargraphs = [] # Contient les graphes de chaque molécule
-symbol_dict = {'C':0, 'O':1, 'N':2, 'S':3, 'Cl':4, 'P':5, 'I':6, 'Na':7, 'Br':8, 'H':9, 'F':10}
+symbol_dict = {'C':0, 'O':1, 'N':2, 'S':3, 'Cl':4, 'P':5, 'I':6, 'Na':7, 'Br':8, 'H':9}
 for smile in smiles_data:
     f_symbols = []  # Contient les features "Symbol" de la molécule
     f_degrees = [] # Contient les features "Degree" de la molécule
@@ -107,19 +107,53 @@ generator = PaddedGraphGenerator(stellargraphs)
 train_data, test_data = train_test_split(data, test_size=0.2)
 
 # Create a padded graph generator with the given graphs, node features and targets
-#generator = PaddedGraphGenerator(graphs,)
+# generator = PaddedGraphGenerator(graphs,)
+
+
+# from tensorflow.python.ops import array_ops
+# from tensorflow.python.ops import math_ops
+# from tensorflow.python.keras import backend
+# from keras.layers import Layer
+#
+#
+# class GlobalSumPooling1D(Layer):
+#     def __init__(self, **kwargs):
+#         super(GlobalSumPooling1D, self).__init__(**kwargs)
+#         self.data_format = 'channel_last'
+#
+#     def call(self, inputs, mask=None, **kwargs):
+#         print("call sum pooling")
+#         steps_axis = 1 if self.data_format == 'channels_last' else 2
+#         if mask is not None:
+#             print("mask not none")
+#             mask = math_ops.cast(mask, inputs[0].dtype)
+#             mask = array_ops.expand_dims(
+#                 mask, 2 if self.data_format == 'channels_last' else 1)
+#             inputs *= mask
+#
+#             print(backend.mean(inputs, axis=steps_axis))
+#             print(backend.sum(inputs, axis=steps_axis))
+#             return backend.sum(
+#                 inputs, axis=steps_axis) / math_ops.reduce_sum(
+#                 mask, axis=steps_axis)
+#         else:
+#             return backend.mean(inputs, axis=steps_axis)
+#
+
 
 def create_graph_classification_model(generator):
+    #sum_pooling = GlobalSumPooling1D()
     gc_model = GCNSupervisedGraphClassification(
         layer_sizes=[15, 20, 27, 36],
         activations=["selu", "selu", "selu", "selu"],
         generator=generator,
         pool_all_layers=True,
+        #pooling=sum_pooling,  # On a modifié le globalAveragePooling pour en faire un GlobalSumPooling dans le code de la librairie
     )
     x_inp, x_out = gc_model.in_out_tensors()
     predictions = Dense(units=96, activation="relu")(x_out)
     predictions = Dense(units=63, activation="relu")(predictions)
-    predictions = Dense(units=360, activation="sigmoid")(predictions) # TODO AJUSTER AU NOMBRE DE DESCRIPTEURS
+    predictions = Dense(units=359, activation="sigmoid")(predictions) # TODO AJUSTER AU NOMBRE DE DESCRIPTEURS
 
     # Let's create the Keras model and prepare it for training
     model = Model(inputs=x_inp, outputs=predictions)
@@ -128,7 +162,7 @@ def create_graph_classification_model(generator):
     return model
 
 epochs = 200  # maximum number of training epochs
-folds = 2  # the number of folds for k-fold cross validation
+folds = 5  # the number of folds for k-fold cross validation
 n_repeats = 4  # the number of repeats for repeated k-fold cross validation
 
 es = EarlyStopping(
@@ -156,10 +190,10 @@ def get_generators(train_index, test_index, graph_labels, batch_size):
     return train_gen, test_gen
 
 test_accs = []
-molecules_predictions_all = []
-odors_predictions_all = []
-smiles_all = []
-n_fold = []
+molecules_predictions = []
+odors_predictions = []
+smiles = []
+stored_acc = 0
 
 model = create_graph_classification_model(generator)
 
@@ -175,19 +209,19 @@ for i, (train_index, test_index) in enumerate(stratified_folds):
 
     history, acc = train_fold(model, train_gen, test_gen, es, epochs)
 
-    # Récupérer les scores de prédiction pour chaque molécule
-    molecules_predictions = model.predict(train_gen)
-    # Récupérer les scores de prédiction pour chaque odeur
-    odors_predictions = model.predict(test_gen)
-    # Créer les indices de l'ensemble de données utilisé
-    indices = np.arange(len(molecules_predictions))
+    if stored_acc < acc:
+        stored_acc = acc
+        # Récupérer les scores de prédiction pour chaque molécule
+        molecules_predictions = model.predict(train_gen)
 
-    # Ajouter les prédictions et les smile aux listes pour tous les plis
-    molecules_predictions_all.append(molecules_predictions[indices, 0])
-    odors_predictions_all.append(odors_predictions[indices, 0])
-    smiles_all.append(smiles_data[indices])
-    for j in range(len(molecules_predictions)):
-        n_fold.append(i)
+        # Récupérer les scores de prédiction pour chaque odeur
+        odors_predictions = model.predict(test_gen)
+
+        # Créer les indices de l'ensemble de données utilisé
+        indices = np.arange(len(molecules_predictions))
+
+        # Ajouter les prédictions et les smile aux listes pour tous les plis
+        smiles = smiles_data[indices]
 
     test_accs.append(acc)
 
@@ -200,16 +234,13 @@ plt.hist(test_accs)
 plt.xlabel("Accuracy")
 plt.ylabel("Count")
 plt.show()
-
-# Concaténer les listes pour tous les plis
-molecules_predictions_all = np.concatenate(molecules_predictions_all)
-odors_predictions_all = np.concatenate(odors_predictions_all)
-smiles_all = np.concatenate(smiles_all)
-
+print("first show")
 # créer un DataFrame à partir des tableaux de prédiction et des smile
-df = pd.DataFrame({'apprentissage': molecules_predictions_all, 'test': odors_predictions_all,
-                       'smiles': smiles_all, 'n_fold': n_fold})
+df = pd.DataFrame({'apprentissage': molecules_predictions, 'test': odors_predictions,
+                       'smiles': smiles})
+print("df")
 # créer et afficher le scatter plot final
 fig = px.scatter(df, x='apprentissage', y='test', hover_name='smiles', color='n_fold')
+print("waiting show")
 fig.show()
 
