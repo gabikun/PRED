@@ -155,6 +155,10 @@ def get_generators(train_index, test_index, graph_labels, batch_size):
     return train_gen, test_gen
 
 test_accs = []
+molecules_predictions_all = []
+odors_predictions_all = []
+smiles_all = []
+n_fold = []
 
 stratified_folds = model_selection.RepeatedKFold(
     n_splits=folds, n_repeats=n_repeats
@@ -179,13 +183,12 @@ for i, (train_index, test_index) in enumerate(stratified_folds):
     # Créer les indices de l'ensemble de données utilisé
     indices = np.arange(len(molecules_predictions))
 
-    # créer un DataFrame à partir des tableaux de prédiction et des sourires, en utilisant les indices pour sélectionner les éléments correspondants
-    df = pd.DataFrame({'molecules_pred': molecules_predictions[indices, 0], 'odors_pred': odors_predictions[indices, 0],
-                       'smiles': smiles_data[indices]})
-
-    fig = px.scatter(df, x='molecules_pred', y='odors_pred', hover_name='smiles',
-                     size=molecules_predictions[indices, 0], color=odors_predictions[indices, 0])
-    fig.show()
+    # Ajouter les prédictions et les smile aux listes pour tous les plis
+    molecules_predictions_all.append(molecules_predictions[indices, 0])
+    odors_predictions_all.append(odors_predictions[indices, 0])
+    smiles_all.append(smiles_data[indices])
+    for j in range(len(molecules_predictions)) :
+        n_fold.append(i)
 
     test_accs.append(acc)
 
@@ -198,3 +201,16 @@ plt.hist(test_accs)
 plt.xlabel("Accuracy")
 plt.ylabel("Count")
 plt.show()
+
+# Concaténer les listes pour tous les plis
+molecules_predictions_all = np.concatenate(molecules_predictions_all)
+odors_predictions_all = np.concatenate(odors_predictions_all)
+smiles_all = np.concatenate(smiles_all)
+
+# créer un DataFrame à partir des tableaux de prédiction et des smile
+df = pd.DataFrame({'apprentissage': molecules_predictions_all, 'test': odors_predictions_all,
+                       'smiles': smiles_all, 'n_fold': n_fold})
+
+# créer et afficher le scatter plot final
+fig = px.scatter(df, x='apprentissage', y='test', hover_name='smiles', color='n_fold')
+fig.show()
