@@ -1,3 +1,4 @@
+from pygments.lexers import go
 from rdkit.Chem import rdmolops
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -127,7 +128,7 @@ def create_graph_classification_model(generator):
     return model
 
 epochs = 200  # maximum number of training epochs
-folds = 5  # the number of folds for k-fold cross validation
+folds = 2  # the number of folds for k-fold cross validation
 n_repeats = 4  # the number of repeats for repeated k-fold cross validation
 
 es = EarlyStopping(
@@ -155,11 +156,12 @@ def get_generators(train_index, test_index, graph_labels, batch_size):
     return train_gen, test_gen
 
 test_accs = []
-molecules_predictions = []
-odors_predictions = []
-smiles = []
-stored_acc = 0
+molecules_predictions_all = []
+odors_predictions_all = []
+smiles_all = []
+n_fold = []
 
+model = create_graph_classification_model(generator)
 
 stratified_folds = model_selection.RepeatedKFold(
     n_splits=folds, n_repeats=n_repeats
@@ -171,23 +173,21 @@ for i, (train_index, test_index) in enumerate(stratified_folds):
         train_index, test_index, graph_labels, batch_size=30
     )
 
-    model = create_graph_classification_model(generator)
-
     history, acc = train_fold(model, train_gen, test_gen, es, epochs)
 
-    if stored_acc < acc:
-        stored_acc = acc
-        # Récupérer les scores de prédiction pour chaque molécule
-        molecules_predictions = model.predict(train_gen)
+    # Récupérer les scores de prédiction pour chaque molécule
+    molecules_predictions = model.predict(train_gen)
+    # Récupérer les scores de prédiction pour chaque odeur
+    odors_predictions = model.predict(test_gen)
+    # Créer les indices de l'ensemble de données utilisé
+    indices = np.arange(len(molecules_predictions))
 
-        # Récupérer les scores de prédiction pour chaque odeur
-        odors_predictions = model.predict(test_gen)
-
-        # Créer les indices de l'ensemble de données utilisé
-        indices = np.arange(len(molecules_predictions))
-
-        # Ajouter les prédictions et les smile aux listes pour tous les plis
-        smiles = smiles_data[indices]
+    # Ajouter les prédictions et les smile aux listes pour tous les plis
+    molecules_predictions_all.append(molecules_predictions[indices, 0])
+    odors_predictions_all.append(odors_predictions[indices, 0])
+    smiles_all.append(smiles_data[indices])
+    for j in range(len(molecules_predictions)):
+        n_fold.append(i)
 
     test_accs.append(acc)
 
@@ -200,12 +200,16 @@ plt.hist(test_accs)
 plt.xlabel("Accuracy")
 plt.ylabel("Count")
 plt.show()
-print("first show")
+
+# Concaténer les listes pour tous les plis
+molecules_predictions_all = np.concatenate(molecules_predictions_all)
+odors_predictions_all = np.concatenate(odors_predictions_all)
+smiles_all = np.concatenate(smiles_all)
+
 # créer un DataFrame à partir des tableaux de prédiction et des smile
-df = pd.DataFrame({'apprentissage': molecules_predictions, 'test': odors_predictions,
-                       'smiles': smiles})
-print("df")
+df = pd.DataFrame({'apprentissage': molecules_predictions_all, 'test': odors_predictions_all,
+                       'smiles': smiles_all, 'n_fold': n_fold})
 # créer et afficher le scatter plot final
 fig = px.scatter(df, x='apprentissage', y='test', hover_name='smiles', color='n_fold')
-print("waiting show")
 fig.show()
+
