@@ -144,13 +144,13 @@ train_data, test_data = train_test_split(data, test_size=0.2)
 
 
 def create_graph_classification_model(generator):
-    #sum_pooling = GlobalSumPooling1D()
+    # sum_pooling = GlobalSumPooling1D()
     gc_model = GCNSupervisedGraphClassification(
         layer_sizes=[15, 20, 27, 36],
         activations=["selu", "selu", "selu", "selu"],
         generator=generator,
         pool_all_layers=True,
-        #pooling=sum_pooling,  # On a modifié le globalAveragePooling pour en faire un GlobalSumPooling dans le code de la librairie
+        # pooling=sum_pooling,  # On a modifié le globalAveragePooling pour en faire un GlobalSumPooling dans le code de la librairie
     )
     x_inp, x_out = gc_model.in_out_tensors()
     predictions = Dense(units=96, activation="relu")(x_out)

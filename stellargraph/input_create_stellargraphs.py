@@ -35,7 +35,7 @@ def create_edges(mol):
     :return: Le dataframe contenant les sources:targets pour chaque atome voisin
     """
 
-    adjacency_matrix = rdmolops.GetAdjacencyMatrix(mol)
+    adjacency_matrix = rdmolops.GetAdjacencyMatrix(mol)  # find fc to have the value 2 for double bonds, 3 for triple bonds
     identity_matrix = np.identity(mol.GetNumAtoms())
     id_adj = np.array(adjacency_matrix) + identity_matrix
     tmp_df = pd.DataFrame(id_adj)
@@ -44,7 +44,7 @@ def create_edges(mol):
     list_source = []
     list_target = []
     for row in edge_list.values:
-        if row[2] == 1.0:  # If there are a connexion between two nodes
+        if row[0] >= row[1] and row[2] == 1.0:  # If there are a connexion between two nodes and take the bond only once
             list_source.append(row[0])
             list_target.append(row[1])
 
@@ -58,21 +58,20 @@ def create_features(mol):
     :return: Le dataframe contenant les caractéristiques des atomes de la molécule
     """
 
-    symbol_dict = {'C': 0, 'O': 1, 'N': 2, 'S': 3, 'Cl': 4, 'P': 5, 'I': 6, 'Na': 7, 'Br': 8, 'H': 9}
+    symbol_dict = {'C': 0, 'O': 1, 'N': 2, 'S': 3, 'Cl': 4, 'Br': 5, 'H': 6}
     f_symbols = []  # Contient les features "Symbol"
     f_degrees = []  # Contient les features "Degree"
     f_implicitValences = []  # Contient les features "Implicit Valence"
     f_aromatic = []  # Contient les features "Aromatic"
-    f_asymmetric_carbon = []  # TODO : Contient les features "Asymmetric carbon"
+    f_chirality = []  # Contient les features "Asymmetric carbon"; 0:CHI_UNSPECIFIED, 1:CHI_TETRAHEDRAL_CW, 2:CHI_TETRAHEDRAL_CCW
 
     for atom in mol.GetAtoms():
         f_symbols.append(symbol_dict[atom.GetSymbol()])
         f_degrees.append(atom.GetDegree())
         f_implicitValences.append(atom.GetImplicitValence())
-        if atom.GetIsAromatic() is True:
-            f_aromatic.append(1)
-        else:
-            f_aromatic.append(0)
+        f_aromatic.append(int(atom.GetIsAromatic()))
+        f_chirality.append(int(atom.GetChiralTag()))
 
     return pd.DataFrame(
-        {"Symbol": f_symbols, "Degree": f_degrees, "ImplicitValence": f_implicitValences, "Aromatic": f_aromatic})
+        {"Symbol": f_symbols, "Degree": f_degrees, "ImplicitValence": f_implicitValences,
+         "Aromatic": f_aromatic, "Chirality": f_chirality})
