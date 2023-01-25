@@ -35,3 +35,5 @@ with open('../data/cleaned_odors.csv', 'w', encoding='utf-8', newline='') as wri
                 casrow = next(casreader)
                 if row[0] != '' and row[1] != '':
                     writer.writerow([casrow[0]] + row)
+
+    # Delete a la main la molécule avec F et avec Na
