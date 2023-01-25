@@ -45,7 +45,9 @@ for i, odor_list in enumerate(encoded_odors):
     for odor in odor_list:
         graph_labels[i][odor] = 1
 
+print(len(graph_labels))
 graph_labels = pd.DataFrame(graph_labels)
+print(graph_labels)
 
 # Créer des matrices d'adjacence pour les molécules
 stellargraphs = [] # Contient les graphes de chaque molécule
