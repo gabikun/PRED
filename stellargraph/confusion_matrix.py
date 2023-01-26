@@ -1,52 +1,12 @@
 import numpy as np
 import plotly.graph_objects as go
 from sklearn.metrics import confusion_matrix
+import pandas as pd
 
 
-# => unique_odors de csv_reader
-class_names = ['trèfle', 'acétique', 'cuit', 'citronelle', 'menthol', 'banane verte', 'bacon', 'poivre noir',
-               'fermentaire', 'ylang-ylang', 'lait frais', 'marin', 'fruit exotique', 'patchouli', 'benjoin',
-               'térébenthine', 'poulet rôti', 'massepain', 'menthe pouliot', 'pomme cuite', 'choucroute', 'babeurre',
-               'poivre', "écorce d'orange", 'graisse de poulet', 'coumarine', 'sève de pin', 'muguet', 'beurre rance',
-               'carbonisé', 'céréale', 'floral', 'concombre', 'grain torréfié', 'lys', 'cresson', 'mimosa', 'yaourt',
-               'amande', 'viande cuite', 'magnolia', 'origan', 'caramel', 'chrysanthème', 'fécal', 'chimique', 'sauge',
-               'poire', 'orange', 'poisson', 'orange amère', 'foin', 'foie', 'sang', 'fumée', 'huître', 'haricot vert',
-               'chips', 'capucine', 'pêche', 'vinaigre', 'poivron', 'airelle', 'brandy', 'bourgeon de cassis',
-               'pivoine', 'cacahuète', 'noix de macadamia', 'fromage bleu', 'asperge', 'pop corn', 'sciure', 'fenouil',
-               'groseille', 'genêt', 'grain', 'violette', 'costarde', 'carambole', 'bergamote', 'acétone',
-               'fruit à coque', 'durian', 'balsamique', 'salsepareille', 'zesté', 'cerise', 'ozone', 'coriandre',
-               'produit pétrolier', 'métal', 'cassis', 'sucre brûlé', 'bouillon de viande', 'mandarine', 'pomme verte',
-               'fromage de chèvre', 'encens', 'pin', 'persil', 'brûlé', 'freesia', 'safran', 'oignon', 'santal',
-               "cire d'abeille", 'urine', 'ciste', 'doux', 'fruit de mer', 'clou de girofle', 'citrouille', 'raifort',
-               'boisé', 'vert', 'jasmin', 'légume', 'oignon cuit', 'whisky', 'saumon', 'boronia', 'bois', 'tequila',
-               'résineux', 'coing', 'beurre', 'genévrier', 'verveine', 'ciboulette', 'animal', 'insecte écrasé',
-               'melon', 'pois de senteur', 'fève tonka', 'fromage', 'cannelle', 'myrrhe', 'anisé', 'styrax',
-               'poulailler', 'tabac', 'fruité', 'ananas', 'chèvrefeuille', 'myrtille', 'friture', 'cookie', 'poireau',
-               'radis', 'cive', 'datte', 'livèche', 'rhum', 'lilas', 'maïs', 'caramel au beurre', 'cèdre',
-               'croûte de pain', 'cardamome', 'rose', 'wasabi', 'chèvre', "fleur d'oranger", 'linge humide', 'tomate',
-               'œillet', 'aldéhyde', 'figue', 'châtaigne', 'épicé', 'œuf', 'artichaut', 'racine', 'citron vert',
-               'champignon', 'coquillage', 'chamallow', 'banane', 'thym', 'amande torréfiée', 'goyave', 'peinture',
-               'graisse', 'immortelle', 'alcool', 'levure', 'ail', 'poussière', 'truffe', 'salade verte', 'basilic',
-               'abricot', 'rance', 'noisette', 'savon', 'vanille', 'agneau', 'pomme', 'gaz', 'aubépine', 'civette',
-               'terre', 'moisi', 'orchidée', "fleur d'acacia", 'barbe à papa', 'absinthe', 'chocolat', 'raisin',
-               'menthe verte', 'orge torréfiée', 'jambon', 'pain', 'cumin', 'menthé', 'galanga', 'fenugrec', 'camphre',
-               'cidre', 'mangue', 'grenade', 'plastique', 'réséda', 'bière', 'solvant', 'framboise', 'héliotrope',
-               'dinde cuite', 'agrume', 'amande amère', 'naphtaline', 'fruit de la passion', 'menthe poivrée',
-               'confiture', 'poudré', 'sapin', 'carvone', 'grillé', 'soufré', 'lavande', 'castoréum', 'houblon',
-               'poulet', 'anis', 'forêt', 'pomme de terre cuite', 'suif', 'prune', 'algue', 'cyprès', 'mouton',
-               'câpres', 'phénolé', 'humus', 'putride', 'mélasse', 'kiwi', 'ambre gris', 'huile', 'luzerne', 'iodé',
-               'acrylate', 'herbe', 'citron', 'café', 'feuille de tomate', 'chicorée', 'poivre vert', 'thon', 'gras',
-               'frais', 'cognac', 'moutarde', 'éther', 'musc', 'réglisse', 'bouillon de légumes', 'carvi', 'moufette',
-               "sirop d'érable", 'bonbon', 'noix de coco', 'cerfeuil', 'bœuf cuit', 'eau de cologne', 'miel', 'vin',
-               'pâtisserie', 'ambrette', 'praline', 'pistache', 'beurre de cacahuète', 'lactique', 'noix de pécan',
-               'fleur de sureau', 'palourde', 'géranium', 'baie', 'chou-fleur', 'caoutchouc', 'jacinthe',
-               'noisette torréfiée', 'estragon', 'papaye', 'mûre', 'tilleul', 'mousse', 'narcisse', 'litchi',
-               'chocolat noir', 'essence', 'fleur de troëne', 'romarin', 'crème', 'eucalyptus', 'pastèque', 'gingembre',
-               'médical', 'bouillon', 'porc cuit', 'médicinal', 'malté', 'sueur', 'chou', 'cyclamen', 'ase fétide',
-               'galbanum', 'acajou', 'parmesan', 'pain de seigle', 'ester', 'pomme de terre', 'papier', 'fruit sec',
-               'graisse animale', 'noix de muscade', 'noix', 'saindoux', 'fraise', 'tubéreuse', 'bois brûlé', 'alliacé',
-               'angélique', 'fleur de tilleul', 'rhubarbe', 'petits pois', 'carotte', 'limbourg', 'curry', 'menthe',
-               'cacao', 'thé', 'camomille', 'noix de cajou', 'cuir', "jaune d'œuf", 'buchu', 'gardénia', 'canneberge']
+# => liste des descripteurs d'odeurs
+data_odors = pd.read_csv("../data/final_odors.csv")
+class_names = data_odors.columns[2:]
 
 
 # import seaborn as sns
