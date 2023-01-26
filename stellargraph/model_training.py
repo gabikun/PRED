@@ -10,14 +10,18 @@ def training(generator, create_model, graph_labels):
     :param generator: Un générateur de données d'apprentissage
     :param create_model: Une fonction permettant de créer un nouveau modèle à chaque pli
     :param graph_labels: Le dataframe contenant l'ensemble des associations molécule/odeurs
-    :return: TODO retourner le meilleur modèle
+    :return: Le meilleur modèle et le jeu de test
     """
 
     epochs = 200  # Nombre maximal d'epochs d'entraînement
-    folds = 5  #  Nombre de plis pour la validation croisée
+    folds = 5  # Nombre de plis pour la validation croisée
     n_repeats = 4  # Nombre de répétitions pour la validation croisée
     test_accs = []
     fold_accs = [[] for _ in range(folds)]
+    best_acc = 0
+    best_model = None
+    best_test = []
+    best_model_index = -1
 
     es = EarlyStopping(monitor="val_loss", min_delta=0, patience=25, restore_best_weights=True)
 
@@ -63,7 +67,7 @@ def training(generator, create_model, graph_labels):
         return train_gen, test_gen
 
     for i, (train_index, test_index) in enumerate(repeated_folds):
-        print(f"Training and evaluating on fold {i+1} out of {folds * n_repeats}...")
+        print(f"Training and evaluating on fold {i + 1} out of {folds * n_repeats}...")
         train_gen, test_gen = get_generators(
             train_index, test_index, graph_labels, batch_size=30
         )
@@ -72,13 +76,21 @@ def training(generator, create_model, graph_labels):
 
         history, acc = train_fold(model, train_gen, test_gen, es, epochs)
 
+        if (acc > best_acc):
+            best_acc = acc
+            best_model = model
+            best_test = test_gen
+            best_model_index = i % folds
+
         test_accs.append(acc)
-        fold_accs[i % folds].append(acc*100)
+        fold_accs[i % folds].append(acc * 100)
 
     print(
-        f"Accuracy over all folds mean: {np.mean(test_accs)*100:.3}% and std: {np.std(test_accs)*100:.2}%"
+        f"Accuracy over all folds mean: {np.mean(test_accs) * 100:.3}% and std: {np.std(test_accs) * 100:.2}%"
     )
     print(fold_accs)
     pyplot.boxplot(fold_accs, showmeans=True)
     pyplot.show()
 
+    print("best model is : model " + str(best_model_index + 1))
+    return best_model, best_test
