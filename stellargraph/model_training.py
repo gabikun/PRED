@@ -2,9 +2,10 @@ import numpy as np
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from sklearn import model_selection
+from PRED.stellargraph.model import create_graph_classification_model
 
 
-def training(generator, create_model, graph_labels):
+def training(generator, graph_labels):
     """
     Fonction s'occupant de l'apprentissage du modèle
     :param generator: Un générateur de données d'apprentissage
@@ -13,9 +14,9 @@ def training(generator, create_model, graph_labels):
     :return: Le meilleur modèle et le jeu de test
     """
 
-    epochs = 200  # Nombre maximal d'epochs d'entraînement
-    folds = 5  # Nombre de plis pour la validation croisée
-    n_repeats = 4  # Nombre de répétitions pour la validation croisée
+    epochs = 50  # Nombre maximal d'epochs d'entraînement
+    folds = 3  # Nombre de plis pour la validation croisée
+    n_repeats = 3  # Nombre de répétitions pour la validation croisée
     test_accs = []
     fold_accs = [[] for _ in range(folds)]
     best_acc = 0
@@ -69,10 +70,10 @@ def training(generator, create_model, graph_labels):
     for i, (train_index, test_index) in enumerate(repeated_folds):
         print(f"Training and evaluating on fold {i + 1} out of {folds * n_repeats}...")
         train_gen, test_gen = get_generators(
-            train_index, test_index, graph_labels, batch_size=30
+            train_index, test_index, graph_labels, batch_size=50
         )
 
-        model = create_model
+        model = create_graph_classification_model(generator, graph_labels.shape[1])
 
         history, acc = train_fold(model, train_gen, test_gen, es, epochs)
 
