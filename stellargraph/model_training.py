@@ -14,14 +14,13 @@ def training(generator, graph_labels):
     :return: Le meilleur modèle et le jeu de test
     """
 
-    epochs = 50  # Nombre maximal d'epochs d'entraînement
-    folds = 3  # Nombre de plis pour la validation croisée
-    n_repeats = 3  # Nombre de répétitions pour la validation croisée
+    epochs = 200  # Nombre maximal d'epochs d'entraînement
+    folds = 5  # Nombre de plis pour la validation croisée
+    n_repeats = 4  # Nombre de répétitions pour la validation croisée
     test_accs = []
     fold_accs = [[] for _ in range(folds)]
     best_acc = 0
     best_model = None
-    best_test = []
     best_model_index = -1
 
     es = EarlyStopping(monitor="val_loss", min_delta=0, patience=25, restore_best_weights=True)
@@ -70,7 +69,7 @@ def training(generator, graph_labels):
     for i, (train_index, test_index) in enumerate(repeated_folds):
         print(f"Training and evaluating on fold {i + 1} out of {folds * n_repeats}...")
         train_gen, test_gen = get_generators(
-            train_index, test_index, graph_labels, batch_size=50
+            train_index, test_index, graph_labels, batch_size=30
         )
 
         model = create_graph_classification_model(generator, graph_labels.shape[1])
@@ -80,7 +79,6 @@ def training(generator, graph_labels):
         if (acc > best_acc):
             best_acc = acc
             best_model = model
-            best_test = test_gen
             best_model_index = i % folds
 
         test_accs.append(acc)
@@ -94,4 +92,4 @@ def training(generator, graph_labels):
     pyplot.show()
 
     print("best model is : model " + str(best_model_index + 1))
-    return best_model, best_test
+    return best_model
