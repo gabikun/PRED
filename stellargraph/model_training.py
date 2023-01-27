@@ -20,6 +20,8 @@ def training(generator, graph_labels):
     test_accs = []
     fold_accs = [[] for _ in range(folds)]
     best_acc = 0
+    best_x_inp = []
+    best_x_out = []
     best_model = None
     best_model_index = -1
 
@@ -72,12 +74,14 @@ def training(generator, graph_labels):
             train_index, test_index, graph_labels, batch_size=30
         )
 
-        model = create_graph_classification_model(generator, graph_labels.shape[1])
+        model, x_inp, x_out = create_graph_classification_model(generator, graph_labels.shape[1])
 
         history, acc = train_fold(model, train_gen, test_gen, es, epochs)
 
         if (acc > best_acc):
             best_acc = acc
+            best_x_inp = x_inp
+            best_x_out = x_out
             best_model = model
             best_model_index = i % folds
 
@@ -92,4 +96,4 @@ def training(generator, graph_labels):
     pyplot.show()
 
     print("best model is : model " + str(best_model_index + 1))
-    return best_model
+    return best_model, best_x_inp, best_x_out

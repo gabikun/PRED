@@ -104,3 +104,6 @@ def old_loading():
 #
 # data.to_csv('../data/final_odors.csv', index=False)
 # delete Na et F a la main dans le csv
+
+
+MIN_DESC_ODORS = 30

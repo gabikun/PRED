@@ -60,9 +60,9 @@ def create_features(mol):
 
     symbol_dict = {'C': 0, 'O': 1, 'N': 2, 'S': 3, 'Cl': 4, 'Br': 5, 'H': 6}
     f_symbols = []  # Contient les features "Symbol"
-    f_degrees = []  # Contient les features "Degree"
-    f_implicitValences = []  # Contient les features "Implicit Valence"
-    f_aromatic = []  # Contient les features "Aromatic"
+    f_degrees = []  # Contient les features "Degree" : nombre de voisins du sommet (tout atome confondu)
+    f_implicitValences = []  # Contient les features "Implicit Valence" : nombre de H absent du smile
+    f_aromatic = []  # Contient les features "Aromatic" :
     f_chirality = []  # Contient les features "Asymmetric carbon"; 0:CHI_UNSPECIFIED, 1:CHI_TETRAHEDRAL_CW, 2:CHI_TETRAHEDRAL_CCW
 
     for atom in mol.GetAtoms():

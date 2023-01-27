@@ -30,4 +30,4 @@ def create_graph_classification_model(generator, n_odors):
     model = Model(inputs=x_inp, outputs=predictions)
     model.compile(optimizer=Adam(0.005), loss=binary_crossentropy, metrics=["acc"])
 
-    return model
+    return model, x_inp, x_out
