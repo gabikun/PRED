@@ -1,5 +1,3 @@
-import pandas as pd
-from sklearn import preprocessing
 from stellargraph.mapper import PaddedGraphGenerator
 from csv_reader import load_data
 from input_create_stellargraphs import create_stellargraphs

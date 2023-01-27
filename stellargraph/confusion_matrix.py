@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.graph_objects as go
+import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 import pandas as pd
 
@@ -27,8 +28,13 @@ def show_confusion_matrix(model, test_gen):
     # Prédictions de votre modèle
     predictions = model.predict(test_gen)
 
-    # Convertir les prédictions en étiquettes
-    predicted_labels = np.argmax(predictions, axis=1)
+    # Définir un seuil pour les prédictions
+    threshold = 0.35
+
+    # Convertir les prédictions en étiquettes en utilisant le seuil
+    predicted_labels = tf.where(predictions > threshold, 1, 0)
+    predicted_labels = tf.argmax(predicted_labels, axis=-1)
+    # predicted_labels = np.argmax(predictions, axis=1)
 
     # Récupérer les étiquettes réelles
     test_labels = np.argmax(test_gen.targets, axis=1)

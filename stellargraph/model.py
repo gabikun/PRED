@@ -18,6 +18,7 @@ def create_graph_classification_model(generator, n_odors):
         activations=["selu", "selu", "selu", "selu"],
         generator=generator,
         pool_all_layers=True,
+        dropout=False
     )
 
     x_inp, x_out = gc_model.in_out_tensors()
