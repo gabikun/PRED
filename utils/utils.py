@@ -2,7 +2,6 @@ import os
 import sys
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 def exception(errorMessage, cond):
@@ -10,10 +9,12 @@ def exception(errorMessage, cond):
         sys.exit(errorMessage)
 
 
-odors_poles = ['Aminé', 'Animal', 'Boisé', 'Chimique', 'Doux',
-               'Empyreumatique', 'Epicé', 'Fermentaire', 'Floral', 'Frais',
-               'Fruité', 'Gras', 'Lactique', 'Lactone', 'Malté',
-               'Minéral', 'Phénolé', 'Soufré', 'Terreux', 'Végétal']
+all_odors_poles = \
+    ['Aminé', 'Animal', 'Boisé', 'Chimique', 'Doux', 'Empyreumatique', 'Epicé', 'Fermentaire', 'Floral', 'Frais',
+     'Fruité', 'Gras', 'Lactique', 'Lactone', 'Malté', 'Minéral', 'Phénolé', 'Soufré', 'Terreux', 'Végétal']
+
+odors_poles = ['Animal', 'Boisé', 'Chimique', 'Doux', 'Fermentaire', 'Floral', 'Frais', 'Fruité', 'Gras', 'Lactique',
+               'Phénolé', 'Soufré']
 
 data_odors_path = os.path.abspath('../data/final_odors_30.csv')
 
@@ -28,4 +29,12 @@ def generate_frequence_hist_odors():
     plt.show()
 
 
-generate_frequence_hist_odors()
+def filter_poles(poles):
+    res = []
+    df = pd.read_csv(data_odors_path)
+    for pole in poles:
+        print(pole)
+        print(df.columns.tolist())
+        if pole.lower() in df.columns.tolist():
+            res.append(pole)
+    return res
