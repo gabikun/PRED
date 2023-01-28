@@ -106,4 +106,12 @@ def old_loading():
 # delete Na et F a la main dans le csv
 
 
+
 MIN_DESC_ODORS = 30
+data = pd.read_csv('../data/final_odors.csv')
+df = pd.DataFrame(data.iloc[:, 2:])
+df = df.loc[:, (df.sum(axis=0) >= MIN_DESC_ODORS)]
+df = pd.concat([data.iloc[:, 0:2], df], axis=1)
+df = df[df.iloc[:, 2:].sum(axis=1) > 0]
+df.to_csv('../data/final_odors_30.csv', index=False)
+

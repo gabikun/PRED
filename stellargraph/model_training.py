@@ -14,9 +14,9 @@ def training(generator, graph_labels):
     :return: Le meilleur modèle et le jeu de test
     """
 
-    epochs = 200  # Nombre maximal d'epochs d'entraînement
-    folds = 5  # Nombre de plis pour la validation croisée
-    n_repeats = 4  # Nombre de répétitions pour la validation croisée
+    epochs = 20  # Nombre maximal d'epochs d'entraînement
+    folds = 2  # Nombre de plis pour la validation croisée
+    n_repeats = 1  # Nombre de répétitions pour la validation croisée
     test_accs = []
     fold_accs = [[] for _ in range(folds)]
     best_acc = 0

@@ -3,10 +3,10 @@ import plotly.graph_objects as go
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 import pandas as pd
-
+from PRED.utils.utils import data_odors_path
 
 # => liste des descripteurs d'odeurs
-data_odors = pd.read_csv("../data/final_odors.csv")
+data_odors = pd.read_csv(data_odors_path)
 class_names = data_odors.columns[2:]
 
 
