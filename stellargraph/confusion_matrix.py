@@ -5,18 +5,11 @@ from sklearn.metrics import confusion_matrix
 import pandas as pd
 from PRED.utils.utils import data_odors_path
 
+
 # => liste des descripteurs d'odeurs
 data_odors = pd.read_csv(data_odors_path)
 class_names = data_odors.columns[2:]
 
-
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-# sns.heatmap(conf_matrix, annot=True, cmap='Blues', xticklabels=class_names_subset,
-#            yticklabels=class_names_subset)
-# plt.xlabel('Predicted')
-# plt.ylabel('True')
-# plt.show()
 
 def show_confusion_matrix(model, test_gen):
     """

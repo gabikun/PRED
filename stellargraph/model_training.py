@@ -1,4 +1,5 @@
 import numpy as np
+import stellargraph as sg
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from sklearn import model_selection
@@ -14,12 +15,12 @@ def training(generator, graph_labels):
     :return: Le meilleur modèle et le jeu de test
     """
 
-    epochs = 20  # Nombre maximal d'epochs d'entraînement
-    folds = 2  # Nombre de plis pour la validation croisée
-    n_repeats = 1  # Nombre de répétitions pour la validation croisée
-    test_accs = []
-    fold_accs = [[] for _ in range(folds)]
-    best_acc = 0
+    epochs = 300  # Nombre maximal d'epochs d'entraînement
+    folds = 3  # Nombre de plis pour la validation croisée
+    n_repeats = 5  # Nombre de répétitions pour la validation croisée
+    test_precisions = []
+    fold_precisions = [[] for _ in range(folds)]
+    best_precision = 0
     best_x_inp = []
     best_x_out = []
     best_model = None
@@ -44,10 +45,10 @@ def training(generator, graph_labels):
             train_gen, epochs=epochs, validation_data=test_gen, verbose=0, callbacks=[es],
         )
         # calculate performance on the test data and return along with history
-        test_metrics = model.evaluate(test_gen, verbose=0)
-        test_acc = test_metrics[model.metrics_names.index("acc")]
+        test_metrics = model.evaluate(test_gen, verbose=1)
+        test_precision = test_metrics[1]  # precision
 
-        return history, test_acc
+        return history, test_precision
 
     def get_generators(train_index, test_index, graph_labels, batch_size):
         """
@@ -76,23 +77,22 @@ def training(generator, graph_labels):
 
         model, x_inp, x_out = create_graph_classification_model(generator, graph_labels.shape[1])
 
-        history, acc = train_fold(model, train_gen, test_gen, es, epochs)
+        history, precision = train_fold(model, train_gen, test_gen, es, epochs)
 
-        if (acc > best_acc):
-            best_acc = acc
+        if (precision > best_precision):
+            best_precision = precision
             best_x_inp = x_inp
             best_x_out = x_out
             best_model = model
             best_model_index = i % folds
 
-        test_accs.append(acc)
-        fold_accs[i % folds].append(acc * 100)
+        test_precisions.append(precision)
+        fold_precisions[i % folds].append(precision)
 
-    print(
-        f"Accuracy over all folds mean: {np.mean(test_accs) * 100:.3}% and std: {np.std(test_accs) * 100:.2}%"
-    )
-    print(fold_accs)
-    pyplot.boxplot(fold_accs, showmeans=True)
+    print(f"Precision over all folds mean: {np.mean(test_precisions):.3}% and std: {np.std(test_precisions):.2}%")
+
+    print(fold_precisions)
+    pyplot.boxplot(fold_precisions, showmeans=True)
     pyplot.show()
 
     print("best model is : model " + str(best_model_index + 1))
