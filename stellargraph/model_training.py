@@ -15,8 +15,8 @@ def training(generator, graph_labels):
     """
 
     epochs = 150  # Nombre maximal d'epochs d'entraînement
-    folds = 4  # Nombre de plis pour la validation croisée
-    n_repeats = 2  # Nombre de répétitions pour la validation croisée
+    folds = 5  # Nombre de plis pour la validation croisée
+    n_repeats = 4  # Nombre de répétitions pour la validation croisée
     test_precisions = []
     fold_precisions = [[] for _ in range(folds)]
     best_precision = 0
