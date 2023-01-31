@@ -1,5 +1,4 @@
 import numpy as np
-import stellargraph as sg
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from sklearn import model_selection
@@ -15,9 +14,9 @@ def training(generator, graph_labels):
     :return: Le meilleur modèle et le jeu de test
     """
 
-    epochs = 300  # Nombre maximal d'epochs d'entraînement
-    folds = 3  # Nombre de plis pour la validation croisée
-    n_repeats = 5  # Nombre de répétitions pour la validation croisée
+    epochs = 150  # Nombre maximal d'epochs d'entraînement
+    folds = 4  # Nombre de plis pour la validation croisée
+    n_repeats = 2  # Nombre de répétitions pour la validation croisée
     test_precisions = []
     fold_precisions = [[] for _ in range(folds)]
     best_precision = 0

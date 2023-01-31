@@ -2,7 +2,7 @@ from tensorflow.keras import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from tensorflow.keras.losses import binary_crossentropy
-from tensorflow.keras.metrics import Precision
+from tensorflow.keras.metrics import Precision, AUC
 from stellargraph.layer import GCNSupervisedGraphClassification
 
 
@@ -32,6 +32,6 @@ def create_graph_classification_model(generator, n_odors):
 
     # Let's create the Keras model and prepare it for training
     model = Model(inputs=x_inp, outputs=predictions)
-    model.compile(optimizer=Adam(0.01), loss=binary_crossentropy, metrics=[Precision()])
+    model.compile(optimizer=Adam(0.01), loss=binary_crossentropy, metrics=[Precision(), AUC()])
 
     return model, x_inp, x_out
