@@ -1,5 +1,5 @@
 from stellargraph.mapper import PaddedGraphGenerator
-from csv_reader import load_data
+from PRED.utils.utils import load_data
 from input_create_stellargraphs import create_stellargraphs
 from model_training import training
 from PRED.stellargraph.confusion_matrix import show_confusion_matrix

@@ -1,12 +1,6 @@
 import os
-import sys
-
 import pandas as pd
 import matplotlib.pyplot as plt
-
-def exception(errorMessage, cond):
-    if cond:
-        sys.exit(errorMessage)
 
 
 all_odors_poles = \
@@ -38,3 +32,16 @@ def filter_poles(poles):
         if pole.lower() in df.columns.tolist():
             res.append(pole)
     return res
+
+
+def load_data():
+    """
+    Fonction chargeant les données (smile & odors) depuis un fichier CSV
+    :return: Retourne le graphe des labels et la liste des smiles
+    """
+
+    data = pd.read_csv(data_odors_path, sep=",", encoding="utf-8")
+    smiles = data["smile"].values
+    odors = data[data.columns[2:]]
+
+    return odors, smiles
