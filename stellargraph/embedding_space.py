@@ -6,38 +6,31 @@ import numpy as np
 
 def show_embedding_space(x_inp, x_out, all_gen, graph_labels):
     categories_odors = []
+
+    labeldict = {0: 'Sans pole', 1: 'animal', 2: 'boisé', 3: 'floral', 4: 'fruité', 5: 'chimique',
+                 6: 'phénolé', 7: 'gras', 8: 'lactique', 9: 'fermentaire', 10: 'soufré',
+                 # 11: 'frais', 12: 'doux'
+                 }
+
+    cdict = {0: 'gray', 1: 'red', 2: 'green', 3: 'yellow', 4: 'orange', 5: 'blue',
+             6: 'cyan', 7: 'purple', 8: 'pink', 9: 'brown', 10: 'olive',
+             # 11: 'black', 12: 'magenta'
+             }
+    pole_list = list(labeldict.values())[1:]
+
     for idx, row in graph_labels.iterrows():
-        if row['animal'] == 1:
-            categories_odors.append(1)
-        elif row['boisé'] == 1:
-            categories_odors.append(2)
-        elif row['chimique'] == 1:
-            categories_odors.append(3)
-        #elif row['doux'] == 1:
-            #categories_odors.append(4)
-        elif row['fermentaire'] == 1:
-            categories_odors.append(5)
-        elif row['floral'] == 1:
-            categories_odors.append(6)
-        elif row['frais'] == 1:
-            categories_odors.append(7)
-        elif row['fruité'] == 1:
-            categories_odors.append(8)
-        elif row['gras'] == 1:
-            categories_odors.append(9)
-        elif row['lactique'] == 1:
-            categories_odors.append(10)
-        elif row['phénolé'] == 1:
-            categories_odors.append(11)
-        elif row['soufré'] == 1:
-            categories_odors.append(12)
+        nb_pole = 0
+        finded_pole = ""
+        for pole in pole_list:
+            if row[pole] == 1:
+                nb_pole += 1
+                finded_pole = pole
+
+        if nb_pole == 1:
+            categories_odors.append(pole_list.index(finded_pole) + 1)
         else:
             categories_odors.append(0)
 
-    cdict = {0: 'gray', 1: 'red', 2: 'green', 3: 'blue', 4: 'yellow', 5: 'purple',
-             6: 'orange', 7: 'pink', 8: 'brown', 9: 'black', 10: 'cyan', 11: 'magenta', 12: 'olive'}
-    labeldict = {0: 'Poleless', 1: 'animal', 2: 'boisé', 3: 'chimique', 5: 'fermentaire',
-                 6: 'floral', 7: 'frais', 8: 'fruité', 9: 'gras', 10: 'lactique', 11: 'phénolé', 12: 'soufré'}
 
     transform = TSNE
 
