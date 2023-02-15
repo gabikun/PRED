@@ -2,9 +2,52 @@ from sklearn.manifold import TSNE
 from tensorflow.keras import Model
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from PRED.utils.utils import data_odors_path
 
 
-def show_embedding_space(x_inp, x_out, all_gen, graph_labels):
+def suit_list(lst):
+    sorted_lst = sorted(set(lst))
+    index_map = {num: index for index, num in enumerate(sorted_lst)}
+    return [index_map[num] for num in lst]
+
+
+def show_embedding_space(x_inp, x_out, all_gen, graph_labels, model):
+    # PREDICTED ODOR
+
+    # predictions = model.predict(all_gen)
+    # predicted_labels = np.argmax(predictions, axis=1)
+    # unique_predicted_labels = np.unique(predicted_labels)
+    # print(unique_predicted_labels)
+    #
+    #
+    # color_predicted = suit_list(predicted_labels)
+    # nb_color = max(color_predicted) + 1
+    # colors = list(plt.rcParams['axes.prop_cycle'].by_key()['color'])[:nb_color]
+    #
+    # data_odors = pd.read_csv(data_odors_path)
+    # class_names = data_odors.columns[2:]
+    # unique_predicted_class = [class_names[i] for i in unique_predicted_labels]
+
+    transform = TSNE
+
+    embedding_model = Model(inputs=x_inp, outputs=x_out)
+
+    X = embedding_model.predict(all_gen)
+
+    trans = transform(n_components=2, metric='cosine')
+    X_reduced = trans.fit_transform(X)
+
+    # fig, ax = plt.subplots(figsize=(7, 7))
+    #
+    # for g in np.unique(color_predicted):
+    #     ix = np.where(color_predicted == g)
+    #     ax.scatter(X_reduced[:, 0][ix], X_reduced[:, 1][ix], c=colors[g], label=unique_predicted_class[g], s=15)
+    #
+    # ax.legend()
+    # plt.show()
+
+    # REAL ODOR
     categories_odors = []
 
     labeldict = {0: 'Sans pole', 1: 'animal', 2: 'boisé', 3: 'floral', 4: 'fruité', 5: 'chimique',
@@ -31,15 +74,6 @@ def show_embedding_space(x_inp, x_out, all_gen, graph_labels):
         else:
             categories_odors.append(0)
 
-
-    transform = TSNE
-
-    embedding_model = Model(inputs=x_inp, outputs=x_out)
-
-    X = embedding_model.predict(all_gen)
-
-    trans = transform(n_components=2, metric='cosine')
-    X_reduced = trans.fit_transform(X)
 
     fig, ax = plt.subplots(figsize=(7, 7))
 
