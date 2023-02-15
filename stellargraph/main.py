@@ -21,4 +21,4 @@ all_predictions = best_model.predict(all_gen)
 
 show_confusion_matrix(model=best_model, test_gen=all_gen)
 
-show_embedding_space(x_inp, x_out, all_gen, graph_labels)
+show_embedding_space(x_inp, x_out, all_gen, graph_labels, best_model)

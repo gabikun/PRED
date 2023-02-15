@@ -45,3 +45,5 @@ def load_data():
     odors = data[data.columns[2:]]
 
     return odors, smiles
+
+# generate_frequence_hist_odors()
